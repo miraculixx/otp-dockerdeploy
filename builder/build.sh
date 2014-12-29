@@ -18,9 +18,9 @@ wget -q -P /var/otp/pdx/ $2 && \
 
 # Let's build the maps
 cd /var/otp && \
-mkdir -p /var/otp/graphs && \
 wget -q -O /var/otp/otp.jar http://dev.opentripplanner.org/jars/otp-latest-master.jar && \
 java -Xmx8G -jar /var/otp/otp.jar --build /var/otp/pdx
 
-# Moving the generated graph to the right dir
+# Moving the generated graph to the shared dir
+mkdir -p /var/otp/graphs && \
 mv /var/otp/pdx/Graph.obj /var/otp/graphs/
