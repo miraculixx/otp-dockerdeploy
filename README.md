@@ -7,6 +7,7 @@ otp-dockerdeploy
 2. [Running the containers] (#running-the-containers)
    * [Starting the server] (#starting-the-server)
    * [Building the graph] (#building-the-graph)
+   * [Starting nginx] (#starting-nginx)
 3. [Unit testing] (#unit-testing)
 
 ## Overview
@@ -66,6 +67,14 @@ After building the graph you should reload the server container:
 `docker restart server`
 
 IMPORTANT: The **server** container must be running before running the builds. Because the shared volume is created by the server container.. 
+
+## Starting nginx
+
+It's also possible to start a nginx proxy server to balance the load and run multiple "server" containers. The command line is the following:
+
+`docker run -p 80:80 -d --name nginx pablokbs/opentripplanner:nginx <SERVER1_IP:PORT> <SERVER2_IP:PORT> ... <SERVERN_IP:PORT>`
+
+That will create a ubuntu container, download puppet, get the nginx module and configure nginx to forward the traffic to the IPs configured as arguments, you can use as many arguments as you want.
 
 ## Unit testing
 
