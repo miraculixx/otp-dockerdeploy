@@ -1,20 +1,14 @@
 #!/bin/bash
 
-# Script that tries to automate the graph building process
-
-if [ -z $2 ]
-  then
-    echo "Usage: "
-    echo "  $0 <GTFS_URL> <PDX_URL>"
-    exit 1
-fi 
 
 # Defining the env variables
 export JAVA_HOME="/usr/lib/jvm/java-7-openjdk-amd64"
 
 mkdir -p /var/otp/pdx && \
-wget -q -P /var/otp/pdx/ $1 && \ 
-wget -q -P /var/otp/pdx/ $2 && \
+
+for url in $@; do
+   wget -q -P /var/otp/pdx/ $url && \
+done
 
 # Let's build the maps
 cd /var/otp && \
