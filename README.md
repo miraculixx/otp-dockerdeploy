@@ -58,9 +58,9 @@ Some useful commands:
 
 Now it's possible to build a new graph for the server. It's easy to use:
 
-`docker run --volumes-from server pablokbs/opentripplanner:builder <GTFS_URL> <PDX_URL>`
+`docker run --volumes-from server pablokbs/opentripplanner:builder -u "url1 url2 ... urln" -e "-noStreets --longDistance"`
 
-That will download the GTFS and the PDX from the specified urls, it will build the graph and also will place the generated graph into the right dir.
+That will download the GTFS and/or PDX from the specified urls (you can specify as many url as you want). You can also pass variables to otp with the "-e" switch. It will build the graph and also will place the generated graph into the right dir.
 
 After building the graph you should reload the server container:
 
