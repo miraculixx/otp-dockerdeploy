@@ -4,8 +4,13 @@ from fabric.decorators import task, roles
 from fabric.operations import local, prompt, run, put
 from fabric.state import env
 from fabric.tasks import execute
+import time
+from dockerfabric import tasks as docker
 
 
+# see https://github.com/merll/docker-fabric
+env.docker_tunnel_local_port = 22024  # or any other available port above 1024 of your choice
+# see http://stackoverflow.com/a/28382014
 env.use_ssh_config = True
 
 running_locally = lambda : not env.hosts or len(env.hosts) == 0
@@ -41,7 +46,7 @@ def build_nginx():
     xrun('docker images | grep opentripplanner')
     
 @task 
-def go(name=None, port=None, urls=None, params=None, build=False):
+def go(name=None, port=None, urls=None, params=None, build=False, router=False):
     """
     run the server, build the graph, restart the server
     
@@ -57,16 +62,23 @@ def go(name=None, port=None, urls=None, params=None, build=False):
         'urls' : ' '.join(urls.split(',')),
         'params' : ' '.join(params.split(',')), 
         'port' : port or 80,
+        'router' : router or 'default'
     }
     if build:
         if not running_locally():
-            target = '/tmp/otp-dockerdeploy'
+            target = './otp-dockerdeploy'
             tmptar = '/tmp/otp-dockerdeploy.tgz'
             run('mkdir -p %s' % target)
-            local('git archive --format tar -o %s')
-            put('otp-dockerdeploy.tgz', target)
-        execute(build_builder)
-        execute(build_server)
+            local('tar -czf %s --exclude .git .' % tmptar)
+            put(tmptar, tmptar)
+            run('tar -C %s -xzf %s' % (target, tmptar))
+            run('docker ps')
+            with cd(target):
+                execute(build_builder)
+                execute(build_server)
+        else:
+            execute(build_builder)
+            execute(build_server)
     cmd_rmserver = (
       'docker rm -f {name} 2>&1 /dev/null'
     ).format(**opts)
@@ -75,7 +87,7 @@ def go(name=None, port=None, urls=None, params=None, build=False):
      ' -p {port}:8080 -d'
      ' --name {name}'
      ' opentripplanner:server '
-     ' --server '         
+     ' --router {router} --server '         
     ).format(**opts)
     cmd_builder = (
       'docker run --volumes-from {name}'
@@ -89,12 +101,13 @@ def go(name=None, port=None, urls=None, params=None, build=False):
     print "[INFO] Running with options %s" % opts
     # run the server (delete existing server first)
     with settings(warn_only=True):
-        local(cmd_rmserver)
-    local(cmd_server)
+        xrun(cmd_rmserver)
+    xrun(cmd_server)
     # build the graph
-    local(cmd_builder)
+    time.sleep(10)
+    xrun(cmd_builder)
     # restart the server
-    local(cmd_restart)
+    xrun(cmd_restart)
     # report success
     print "[INFO] server {name} running at http://localhost:{port}".format(**opts)
     
@@ -106,3 +119,7 @@ def dockerrm(images=None, containers=None):
     prompt('Are you sure? Press Ctrl-C otherwise.')
     xrun('docker ps --all | grep Exited | cut -c1-19 | xargs -L1 docker rm')
     xrun('docker images | grep "6 months" | cut -c 35-65 | xargs -L1 docker rmi')
+    
+@task 
+def enter(name=None):
+    xrun('PID=$(docker inspect --format {{.State.Pid}} %s) && nsenter --target $PID --mount' % name)
