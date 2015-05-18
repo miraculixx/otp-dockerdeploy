@@ -22,7 +22,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
 RUN \
   mkdir /var/otp && \
   cd /var/otp && \
-  wget -q -O /var/otp/otp.jar http://dev.opentripplanner.org/jars/otp-latest-master.jar
+  wget -q -O /var/otp/otp.jar http://dev.opentripplanner.org/jars/otp-0.14.0.jar
 
 # Expose ports for other containers
 EXPOSE 8080

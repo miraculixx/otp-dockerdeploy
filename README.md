@@ -14,7 +14,33 @@ otp-dockerdeploy
 
 This project has a Dockerfile to deploy an opentripplanner instance, with the GTFS for Switzerland built in. There is also a unittest script to run the instance and check if everything is working.
 
-## Running the containers
+## Install
+
+```
+chmod +x install.sh
+sudo ./install.sh
+```
+
+## Quick start
+
+```
+fab go:urls=http://url/to/gtfs.zip,port=80,build=y,name=otpserver
+```
+
+Make sure to replace the URL to the actual GTFS feed you want to use. This will build the necessary docker images, build the OTP graph and
+start otp server. Access the server at http://localhost:80. You may start as many servers as you want, they don't interfere with each other as
+long as you use different ports and a different name for each server. 
+
+To download a new GTFS feed and build again:
+
+```
+fab go:urls=http://url/to/new-gtfs.zip,port=80,name=otpserver
+```
+
+This will stop (actually, kill and remove) the server, download the GTFS file and restart the server again.
+	
+
+## Running the containers manually
 
 First pull the Docker container from the repo (the repo might change):
 
@@ -58,7 +84,7 @@ Some useful commands:
 
 Now it's possible to build a new graph for the server. It's easy to use:
 
-`docker run --volumes-from server pablokbs/opentripplanner:builder -u "url1 url2 ... urln" -e "-noStreets --longDistance"`
+`docker run --volumes-from server pablokbs/opentripplanner:builder -u "url1 url2 ... urln" -e "--noStreets --longDistance"`
 
 That will download the GTFS and/or PDX from the specified urls (you can specify as many url as you want). You can also pass variables to otp with the "-e" switch. It will build the graph and also will place the generated graph into the right dir.
 
@@ -105,3 +131,14 @@ This is an example output:
 ```
 
 As you can see, it creates the container, starts it, and tests a little search.
+
+### Building the images
+
+Other then the unit test above, we provide a simple Python Fabric script:
+
+```
+# build the images
+fab build_server build_builder build_nginx
+docker images | grep opentripplanner
+```
+
