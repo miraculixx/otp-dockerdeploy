@@ -80,7 +80,7 @@ def go(name=None, port=None, urls=None, params=None, build=False, router=False):
             execute(build_builder)
             execute(build_server)
     cmd_rmserver = (
-      'docker rm -f {name} 2>&1 /dev/null'
+      'docker rm -f {name} 2>&1 >/dev/null'
     ).format(**opts)
     cmd_server = (
      'docker run '
