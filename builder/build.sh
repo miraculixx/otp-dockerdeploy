@@ -15,7 +15,7 @@ OTP_BASE=/var/otp
 OTP_GRAPHS=$OTP_BASE/graphs
 OTP_ROUTER=${router:-default}
 
-mkdir -p $OTP_GRAPHS
+mkdir -p $OTP_GRAPHS/$OTP_ROUTER
 
 for url in $urls; do
 echo "downloading $url"
