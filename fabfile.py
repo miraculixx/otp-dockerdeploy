@@ -46,7 +46,8 @@ def build_nginx():
     xrun('docker images | grep opentripplanner')
     
 @task 
-def go(name=None, port=None, urls=None, params=None, build=False, router=False):
+def go(name=None, port=None, urls=None, params=None, build=False, 
+       router=False, headers=None, useragent=None):
     """
     run the server, build the graph, restart the server
     
@@ -62,7 +63,9 @@ def go(name=None, port=None, urls=None, params=None, build=False, router=False):
         'urls' : ' '.join(urls.split(',')),
         'params' : ' '.join(params.split(',')), 
         'port' : port or 80,
-        'router' : router or 'default'
+        'router' : router or 'default',
+        'headers' : headers.split(',') if headers else '', 
+        'useragent' : useragent,
     }
     if build:
         if not running_locally():
@@ -89,10 +92,16 @@ def go(name=None, port=None, urls=None, params=None, build=False, router=False):
      ' opentripplanner:server '
      ' --router {router} --server '         
     ).format(**opts)
+    useragent = opts.get('useragent')
+    headers = opts.get('headers')
+    opts['_headers'] = [' -H %s' % h for h in headers] if headers else ''
+    opts['_useragent'] = ('-U %s' % useragent) if useragent else ''
+    print opts
     cmd_builder = (
       'docker run --volumes-from {name}'
      ' opentripplanner:builder '
      ' -u "{urls}" -e "{params}"'
+     ' {_useragent} {_headers} ' 
     ).format(**opts)
     cmd_restart = (
       'docker restart {name}'

@@ -2,11 +2,13 @@
 
 
 # Getting the urls and environment variables for otp
-while getopts ":u:e:" opt
+while getopts ":u:e:U:H" opt
    do
       case $opt in
         u ) urls=$OPTARG;;
         e ) envs=$OPTARG;;
+        U ) useragent="-U $OPTARG";;
+        H ) headers="$headers --header $OPTARG";;
         r ) router=$OPTARG;;
       esac
 done
@@ -19,7 +21,9 @@ mkdir -p $OTP_GRAPHS/$OTP_ROUTER
 
 for url in $urls; do
 echo "downloading $url"
-wget -S -nv -P $OTP_GRAPHS/$OTP_ROUTER $url || echo "-- error" 
+wget_opts="-S -nv $headers $useragent -P $OTP_GRAPHS/$OTP_ROUTER $url"
+echo "wget $wget_opts" 
+wget $wget_opts || echo "-- error" 
 done
 
 # Defining the env variables
