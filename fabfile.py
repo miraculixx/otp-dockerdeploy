@@ -96,7 +96,6 @@ def go(name=None, port=None, urls=None, params=None, build=False,
     headers = opts.get('headers')
     opts['_headers'] = [' -H %s' % h for h in headers] if headers else ''
     opts['_useragent'] = ('-U %s' % useragent) if useragent else ''
-    print opts
     cmd_builder = (
       'docker run --volumes-from {name}'
      ' opentripplanner:builder '
@@ -106,17 +105,23 @@ def go(name=None, port=None, urls=None, params=None, build=False,
     cmd_restart = (
       'docker restart {name}'
     ).format(**opts)
+    cmd_serverlog = (
+       'docker ps | grep {name} | cut -c 1-10 | xargs docker logs'
+    ).format(**opts)
     # be nice and tell what we're doing
     print "[INFO] Running with options %s" % opts
     # run the server (delete existing server first)
     with settings(warn_only=True):
         xrun(cmd_rmserver)
     xrun(cmd_server)
-    # build the graph
     time.sleep(10)
+    xrun(cmd_serverlog)
+    # build the graph
     xrun(cmd_builder)
     # restart the server
     xrun(cmd_restart)
+    time.sleep(10)
+    xrun(cmd_serverlog)
     # report success
     print "[INFO] server {name} running at http://localhost:{port}".format(**opts)
     
