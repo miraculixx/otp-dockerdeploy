@@ -90,7 +90,8 @@ def go(name=None, port=None, urls=None, params=None, build=False,
      ' -p {port}:8080 -d'
      ' --name {name}'
      ' opentripplanner:server '
-     ' --router {router} --server '         
+     ' --router {router} --server '    
+     #' --longDistance '     
     ).format(**opts)
     useragent = opts.get('useragent')
     headers = opts.get('headers')

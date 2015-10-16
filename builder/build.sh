@@ -32,7 +32,7 @@ export JAVA_HOME="/usr/lib/jvm/java-7-openjdk-amd64"
   
 # Let's build the maps
 echo "generating graph"  
-java -Xmx8G -jar /var/otp/otp.jar --build $OTP_GRAPHS/$OTP_ROUTER $envs
+java -Xmx16G -jar /var/otp/otp.jar --build $OTP_GRAPHS/$OTP_ROUTER $envs
 
 # Moving the generated graph to the shared dir
 echo "finalizing"
